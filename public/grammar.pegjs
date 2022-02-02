@@ -1,19 +1,30 @@
-Ink
-  = (Knot / Choice / PlainProse / DivertLine)*EOF
+Ink_Top_Level
+  = (Knot / Ink_Knot_Level)*EOF
+
+Ink_Knot_Level
+	= Stitch / Ink_Stitch_Level
+
+Ink_Stitch_Level
+	= DivertLine / Choice / Gather / PlainProse
 
 Choice
-	= (wSpace)*sym:(choiceSymbol)str:(PlainProse) {
-		if (sym === '+')
-		{ return `SINGLE_CHOICE(${str})\n`; }
+	= wSpace*sym:("*" / "+")str:PlainProse {
+		if (sym === "+")
+		{ return `STICKY_CHOICE(${str})\n`; }
 		else
-		{ return `CHOICE(${str})\n`; }
+		{ return `SINGLE_CHOICE(${str})\n`; }
+	}
+
+Gather
+	= wSpace* "-" str:PlainProse {
+		return `GATHER(${str})\n`;
 	}
 
 PlainProse
 	= lines:(PlainLine)+ {return `PROSE(\n\t${lines})\n`; }
 
 PlainLine
-	= wSpace* &[^*+] !("==" "="*) TextString divert:Divert? LineTerminator* {
+	= wSpace* &[^*+-] !("="+ ) TextString divert:Divert? LineTerminator* {
 		return `LINE(${text().split("->")[0].trim()})${divert || ""}`; 
 	}
 
@@ -24,8 +35,13 @@ TextCharacter
   = [^\n\r\\#] / "\\" char:[\\#] { return char; }
 
 Knot
-	=	"==""="* wSpace* knot_label:validIdentifier wSpace* "="* LineTerminator+ {
-		return `KNOT(${knot_label})\n`;
+	=	"==""="* wSpace* knot_label:validIdentifier wSpace* "="* LineTerminator+ knot_contents:Ink_Knot_Level* {
+		return `KNOT[${knot_label}](${knot_contents})\n`;
+	}
+
+Stitch
+	= "=" wSpace* stitch_label:validIdentifier wSpace* "="* LineTerminator+ stitch_contents:Ink_Stitch_Level* {
+		return `STITCH[${stitch_label}](${stitch_contents})\n`;
 	}
 
 DivertLine
@@ -35,15 +51,6 @@ Divert
 	= wSpace* "->" wSpace* divert_label:validIdentifier {
 		return `DIVERT(${divert_label})`;
 	}
-
-choiceSymbol
-	= "*" / "+"
-
-divertSequence
-  = "->"
-
-gatherSymbol
-	= "-"
 
 //Identifier can't start with a number…
 indentifierBeginCharacter
