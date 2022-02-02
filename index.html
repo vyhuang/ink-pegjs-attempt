@@ -3,29 +3,42 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
 		<style>
-			#error-message {background-color: palevioletred;}
+			.column {
+				height: 95vh;
+				overflow-y: scroll;
+			}
+			.column-left {
+				float: left;
+				width: 60%;
+			}
+			.column-right {
+				float: left;
+				width: 40%;
+			}
+			#text-to-parse {
+				font-family: monospace;
+				-webkit-box-sizing: border-box;
+				-moz-box-sizing: border-box;
+				box-sizing: border-box;
+				width: 100%;
+			}
 			#parsed-text {
-				background-color: powderblue;
 				white-space: pre-wrap;
+				font-family: monospace;
 			}
 		</style>
   </head>
   <body>
-		<form>
-			<label for="text-to-parse">Text to Parse</label>
-			<br/>
-			<textarea id="text-to-parse" rows="12" cols="70" placeholder="Try typing ink script in here"></textarea>
-		</form>
-
-		<br/>
-		<div id="error-message"></div>
-
-		<br/>
-		<label for="parsed-text">Transformed Text</label><br>
-		<div id="parsed-text"></div>
-    <script type="module" src="/src/main.ts"></script>
+		<div class="row">
+			<div class="column column-left">
+				<div id="text-to-parse"></div>
+			</div>
+			<div class="column column-right">
+				<div id="parsed-text"></div>
+			</div>
+		</div>
+  <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
