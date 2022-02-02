@@ -4,7 +4,7 @@ import parse from './parser/parser';
 const parsedTextField = document.getElementById("parsed-text");
 const errorField = document.getElementById("error-message");
 
-fetch('test-sentence.txt').then(response => {
+fetch('test.txt').then(response => {
 	return response.text();
 }).then(data => {
 	const textToParse = document.getElementById("text-to-parse");
