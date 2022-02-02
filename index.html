@@ -5,18 +5,24 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite App</title>
+		<style>
+			#error-message {background-color: palevioletred;}
+			#parsed-text {background-color: powderblue;}
+		</style>
   </head>
   <body>
 		<form>
 			<label for="text-to-parse">Text to Parse</label>
 			<br/>
-			<textarea id="text-to-parse" rows="4" cols="70" placeholder="Try typing ink script in here"></textarea>
+			<textarea id="text-to-parse" rows="12" cols="80" placeholder="Try typing ink script in here"></textarea>
 		</form>
 
 		<br/>
+		<div id="error-message"></div>
+
+		<br/>
 		<label for="parsed-text">Transformed Text</label><br>
-		<div id="parsed-text">
-		</div>
+		<div id="parsed-text"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
