@@ -7,14 +7,17 @@
     <title>Vite App</title>
 		<style>
 			#error-message {background-color: palevioletred;}
-			#parsed-text {background-color: powderblue;}
+			#parsed-text {
+				background-color: powderblue;
+				white-space: pre-wrap;
+			}
 		</style>
   </head>
   <body>
 		<form>
 			<label for="text-to-parse">Text to Parse</label>
 			<br/>
-			<textarea id="text-to-parse" rows="12" cols="80" placeholder="Try typing ink script in here"></textarea>
+			<textarea id="text-to-parse" rows="12" cols="70" placeholder="Try typing ink script in here"></textarea>
 		</form>
 
 		<br/>

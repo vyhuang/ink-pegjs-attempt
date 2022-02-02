@@ -1,30 +1,51 @@
-// Simple Arithmetics Grammar
-// ==========================
-//
-// Accepts expressions like "2 * (3 + 4)" and computes their value.
+Ink
+  = (Choice+ / PlainProse)*EOF
 
-Expression
-  = head:Term tail:(_ ("+" / "-") _ Term)* {
-      return tail.reduce(function(result, element) {
-        if (element[1] === "+") { return result + element[3]; }
-        if (element[1] === "-") { return result - element[3]; }
-      }, head);
-    }
+Choice
+	= (whitespace)*sym:(choiceSymbol)str:(PlainProse) {
+		if (sym === '+')
+		{
+			return `SINGLE_CHOICE(${str})`
+		}
+		else
+		{
+			return `CHOICE(${str})`
+		}
+	}
 
-Term
-  = head:Factor tail:(_ ("*" / "/") _ Factor)* {
-      return tail.reduce(function(result, element) {
-        if (element[1] === "*") { return result * element[3]; }
-        if (element[1] === "/") { return result / element[3]; }
-      }, head);
-    }
+PlainProse
+	= lines:(PlainLine)+ {return `PROSE(${lines})`}
 
-Factor
-  = "(" _ expr:Expression _ ")" { return expr; }
-  / Integer
+PlainLine
+	= (whitespace)*&[^+*](TextString)(LineTerminator)* {return `LINE(${text()})`}
 
-Integer "integer"
-  = _ [0-9]+ { return parseInt(text(), 10); }
+TextString
+	= chars:TextCharacter+ { return chars.join("")}
 
-_ "whitespace"
-  = [ \t\n\r]*
+TextCharacter
+  = [^\n\r\\#]
+	/ "\\" char:[\\#] { return char}
+
+choiceSymbol
+	= "*" / "+"
+
+gatherSymbol
+	= "-"
+
+whitespace
+	= " "
+	/ "\t"
+	/ "\v"
+	/ "\f"
+	/ "\u00A0"
+	/ "\uFEFF"
+
+LineTerminator
+  = "\n"
+  / "\r\n"
+  / "\r"
+  / "\u2028"
+  / "\u2029"
+
+EOF
+  = !.

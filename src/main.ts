@@ -31,11 +31,17 @@ function parseHandler(textContent: string) {
 }
 
 function parseErrorHandler(error: any) {
+	console.log(error);
 	if (errorField !== null)
 	{
-		errorField.innerHTML = 
-			`<div>Error found at ${error.location}</div>
-			<div>${error.message}</div>`;
+		let htmlErrorString = "";
+		if (error.location !== undefined && error.location.start != undefined)
+		{
+			htmlErrorString += 
+				`<div>Error found in line ${error.location.start.line}, column ${error.location.start.column}:</div>`
+		}
+		htmlErrorString += `<div>${error.message}</div>`;
+		errorField.innerHTML = htmlErrorString;
 	}
 	if (parsedTextField !== null)
 	{
