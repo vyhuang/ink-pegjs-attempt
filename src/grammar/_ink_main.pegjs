@@ -5,7 +5,7 @@ Ink_Knot_Level
 	= Stitch / Ink_Stitch_Level
 
 Ink_Stitch_Level
-	= DivertLine / Choice / Gather / PlainProse
+	= DivertLine / Choice / Gather / PlainProse / wSpace* LineTerminator+
 
 Choice
 	= wSpace*sym:("*" / "+")str:PlainProse {
@@ -21,10 +21,10 @@ Gather
 	}
 
 PlainProse
-	= lines:(PlainLine)+ {return `PROSE(\n\t${lines})\n`; }
+	= (PlainLine)+
 
 PlainLine
-	= wSpace* &[^*+-] !("="+ ) TextString divert:Divert? LineTerminator* {
+	= wSpace* &[^*+-] !("="+ ) TextString divert:Divert? LineTerminator+ {
 		return `LINE(${text().split("->")[0].trim()})${divert || ""}`; 
 	}
 
@@ -45,17 +45,18 @@ Stitch
 	}
 
 DivertLine
-	= Divert LineTerminator*
+	= Divert LineTerminator+
 
 Divert
-	= wSpace* "->" wSpace* divert_label:validIdentifier {
+	= wSpace* "->" wSpace* divert_label:validIdentifier wSpace* {
 		return `DIVERT(${divert_label})`;
 	}
 
-//Identifier can't start with a number…
+// Defines identifiers used for variable names and knot/stitch labels.
+// Identifier can't start with a number…
 indentifierBeginCharacter
 	= [a-zA-Z_\u0100-\u017F\u0180-\u024F\u0600-\u06FF\u0530-\u058F\u0400-\u04FF\u0370-\u03FF\u0590-\u05FF]
-//Identifier characters can anything within these unicode blocks
+// Identifier characters can anything within these unicode blocks
 indentifierCharacter
 	= [a-zA-Z0-9_\u0100-\u017F\u0180-\u024F\u0600-\u06FF\u0530-\u058F\u0400-\u04FF\u0370-\u03FF\u0590-\u05FF]
 anyNonIdentifierCharacter
@@ -63,6 +64,7 @@ anyNonIdentifierCharacter
 validIdentifier
 	= char:indentifierBeginCharacter chars:indentifierCharacter* {return char+chars.join(""); }
 
+// TODO: Properly change this when you have the time
 standardFunctions
 	= 'LIST_COUNT|LIST_MIN|LIST_MAX|LIST_ALL|LIST_INVERT|LIST_RANDOM|CHOICE_COUNT|TURNS_SINCE|LIST_RANGE|TURNS|POW|FLOOR|CEILING|INT|FLOAT'
 

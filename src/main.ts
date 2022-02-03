@@ -4,24 +4,32 @@ import { EditorState, EditorView, basicSetup } from '@codemirror/basic-setup';
 import { lineNumbers } from '@codemirror/gutter';
 import { ViewUpdate } from '@codemirror/view';
 
+const testFile = 'test-choice.txt'
+
+// Get handles on all the fields on the page.
 const errorField = document.getElementById("error-message")!;
 const parsedTextField = document.getElementById("parsed-text")!;
 const textToParse = document.getElementById("text-to-parse")!;
 
+// Set up CodeMirror to:
+// - have line numbers
+// - wrap any overflowing lines
+// - call updateText() whenever the content inside the editor changes
+// - attach as a child to the HTML element 'textToParse'
 let editorView = new EditorView({
 	state: EditorState.create({
 		extensions: [
 			basicSetup, 
 			lineNumbers(),
-			EditorView.updateListener.of(updateText),
-			EditorView.lineWrapping
+			EditorView.lineWrapping,
+			EditorView.updateListener.of(updateText)
 		]
 	}),
 	parent: textToParse
 });
 
 
-fetch('test.txt').then(response => {
+fetch(testFile).then(response => {
 	return response.text();
 }).then(data => {
 	// insert the initial data into the editor.
@@ -42,7 +50,8 @@ function updateText (update: ViewUpdate) {
 		.then(parseHandler, parseErrorHandler);
 }
 
-function parseHandler(textContent: string) {
+function parseHandler(output: any) {
+	const textContent = JSON.stringify(output);
 	parsedTextField.innerText = textContent;
 	parsedTextField.style.backgroundColor = "powderblue";
 }
