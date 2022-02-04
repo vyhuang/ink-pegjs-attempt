@@ -41,7 +41,8 @@ _validTextCharacterString = [^{}|\n\r\\\#\"]
 _validTextCharacter = [^{}|\n\r\\#] 
 _invalidTextCharacter = [{}|\n\r#\\] 
 
-// TODO: Corresponds to InkParser_Choices.cs
+// Corresponds to InkParser_Choices.cs
+// TODO: implement choices & tags
 Choice
 	= choiceSymbol:(Whitespace @"*" / Whitespace @"+") 
 			name:(Whitespace @BracketedName)?
@@ -50,7 +51,7 @@ Choice
 			tags:(Whitespace /* Tags */ )?
 			divert:(Whitespace @Divert)?
 			EOL {
-				// TODO: uncomment condition line and remove following value set
+				// TODO: stop setting condition to null after implementing conditional statements
 				const condition = null;
 				let finalInnerContent = head.innerContent;
 				if (divert !== null) {
