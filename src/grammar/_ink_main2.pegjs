@@ -6,9 +6,8 @@ Story
 // Corresponds somewhat to InkParser_Content.cs
 // TODO: flesh out choice & string parsing
 ContentList
-	= Choice 
-	/ Divert
-	/// lines:(PlainContentLine Newlines?)+ { return { type:'contentlist', value: lines }; }
+	= Choice / Divert
+	//lines:(PlainContentLine Newlines?)+ { return { type:'contentlist', value: lines }; }
 
 ChoiceMixedTextAndLogic
 	= text:ChoiceContentText /*TODO: (ContentText InlineLogicOrGlue / ContentText / InlineLogicOrGlue)+ */ {
@@ -17,7 +16,9 @@ ChoiceMixedTextAndLogic
 
 PlainContentLine
 	= text:PlainContentText divert:(Whitespace @Divert)? /*/ ThreadArrow / */ Whitespace &EOL /* / Glue */ {
-		return [text, divert];
+		const line = [text];
+		if (divert) text.push(divert);
+		return line;
 	}
 
 ChoiceContentText
@@ -30,16 +31,15 @@ PlainContentText
 	}
 
 ChoiceContentCharacter
-	= !"->" char:("\\" @(_invalidTextCharacter / [\[\]]) / @(_validTextCharacterChoice)) { return char; }
+	= !"->" char:("\\" @(_invalidTextCharacter / [\[\]*+]) / @_validTextCharacterChoice) { return char; }
 StringContentCharacter
-	= "\\" @(_invalidTextCharacter / "\"") / _validTextCharacterString
+	= !"->" "\\" @(_invalidTextCharacter / "\"") / _validTextCharacterString
 PlainContentCharacter
 	= !"->" char:("\\" @_invalidTextCharacter / @_validTextCharacter) { return char; }
-
 _validTextCharacterChoice = [^{}|\n\r\\\#\[\]]
 _validTextCharacterString = [^{}|\n\r\\\#\"]
 _validTextCharacter = [^{}|\n\r\\#] 
-_invalidTextCharacter = [{}|\n\r\\#] 
+_invalidTextCharacter = [{}|\n\r#\\] 
 
 // TODO: Corresponds to InkParser_Choices.cs
 Choice

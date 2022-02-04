@@ -45,13 +45,13 @@ fetch(testFile).then(response => {
 });
 
 function updateText (update: ViewUpdate) {
-	console.log("calling updateText");
+	//console.log("calling updateText");
 	parse(update.view.state.doc.toString())
 		.then(parseHandler, parseErrorHandler);
 }
 
 function parseHandler(output: any) {
-	const textContent = JSON.stringify(output);
+	const textContent = JSON.stringify(output, null, 2);
 	parsedTextField.innerText = textContent;
 	parsedTextField.style.backgroundColor = "powderblue";
 }
