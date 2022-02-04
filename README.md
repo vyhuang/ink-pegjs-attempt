@@ -1,6 +1,7 @@
 This is an attempt to implement the compiler for Inkle's ink scripting language using the Peggy JS library. The grammar definition is contained in 'src/grammar/_ink_main2.pegjs'.
 
 If you would like to check the work out, simply clone the repository, run `npm install` in the root directory, then `npm run dev`. This will start up a local dev server with a web page that looks like this:
+
 ![](test_page.PNG)
 
 The page will automatically update and re-run the parser whenever the following occurs:
