@@ -8,11 +8,11 @@ Story
 ContentList
 	= Choice 
 	/ Divert
-	/ lines:(PlainContentLine Newlines?)+ { return { type:'contentlist', value: lines }; }
+	/// lines:(PlainContentLine Newlines?)+ { return { type:'contentlist', value: lines }; }
 
 ChoiceMixedTextAndLogic
-	=  chars:ChoiceContentCharacter+ /*TODO: (ContentText InlineLogicOrGlue / ContentText / InlineLogicOrGlue)+ */ {
-		return { type: "text", value: chars.join("") };
+	= text:ChoiceContentText /*TODO: (ContentText InlineLogicOrGlue / ContentText / InlineLogicOrGlue)+ */ {
+		return text ? [text] : [];
 	}
 
 PlainContentLine
@@ -20,13 +20,17 @@ PlainContentLine
 		return [text, divert];
 	}
 
+ChoiceContentText
+	= chars:(ChoiceContentCharacter*) {
+		return chars.length > 0 ?  { type: "text", value: chars.join("") } : null;
+	}
 PlainContentText
 	= chars:PlainContentCharacter+ {
 		return { type: "text", value: chars.join("") };
 	}
 
 ChoiceContentCharacter
-	= !"->" ("\\" @(_invalidTextCharacter / [\[\]])) / (_validTextCharacterChoice)
+	= !"->" char:("\\" @(_invalidTextCharacter / [\[\]]) / @(_validTextCharacterChoice)) { return char; }
 StringContentCharacter
 	= "\\" @(_invalidTextCharacter / "\"") / _validTextCharacterString
 PlainContentCharacter
@@ -39,43 +43,52 @@ _invalidTextCharacter = [{}|\n\r\\#]
 
 // TODO: Corresponds to InkParser_Choices.cs
 Choice
-	= Whitespace choiceSymbol:("*" / "+") 
+	= choiceSymbol:(Whitespace @"*" / Whitespace @"+") 
 			name:(Whitespace @BracketedName)?
 			/*condition:(Whitespace ChoiceCondition )?*/
-			startContent:(Whitespace @ChoiceMixedTextAndLogic)?
-			optionOnlyContent:(Whitespace hasBrackets:"[" @ChoiceMixedTextAndLogic "]")?
-			innerContent:(Whitespace @ChoiceMixedTextAndLogic)?
-			postContent:( 
-				divert:(&{ startContent || optionOnlyContent || innerContent } Whitespace @Divert)
-				/ fallbackInnerContent:(Whitespace "->" Whitespace @ChoiceMixedTextAndLogic )
-			{ return { divert, fallbackInnerContent }; })?
+			head:(ChoiceFallbackHead / ChoiceHead)
 			tags:(Whitespace /* Tags */ )?
-			fallbackDivert:(Whitespace @Divert)?
+			divert:(Whitespace @Divert)?
 			EOL {
 				// TODO: uncomment condition line and remove following value set
 				const condition = null;
-				let finalInnerContent = [innerContent];
-				let finalDivert;
-				if (postContent !== null) {
-					finalInnerContent = postContent.fallbackInnerContent || null;
-					finalDivert = postContent.divert || null;
-				}
-				finalDivert = postContent || fallbackDivert;
-				if (finalDivert !== null) {
-					finalInnerContent.push(finalDivert);
+				let finalInnerContent = head.innerContent;
+				if (divert !== null) {
+					finalInnerContent.push(divert);
 				}
 				return {
-					startContent,
-					optionOnlyContent,
+					startContent: head.startContent,
+					optionOnlyContent: head.optionOnlyContent,
 					finalInnerContent,
 					identifier: name,
 					// indentationDepth,
-					hasWeaveStyleInlineBrackets: optionOnlyContent !== null && optionOnlyContent.hasBrackets !== undefined,
+					hasWeaveStyleInlineBrackets: 
+						head.optionOnlyContent && head.optionOnlyContent.hasBrackets,
 					condition,
 					onceOnly: choiceSymbol === '*',
-					isInvisibleDefault: postContent !== null && postContent.fallbackInnerContent !== undefined
+					isInvisibleDefault: head.isFallback
 				};
 			}
+
+ChoiceFallbackHead
+	= Whitespace "->" _innerC:(Whitespace @ChoiceMixedTextAndLogic)? {
+			return {
+				startContent: [], optionOnlyContent: [], innerContent: _innerC, isFallback: true
+			};
+		}
+ChoiceHead
+	=	_startC:(Whitespace @ChoiceMixedTextAndLogic)?
+		_optionC:(Whitespace 
+			_hasBrackets:"[" _content:ChoiceMixedTextAndLogic "]" { 
+				return { hasBrackets: _hasBrackets !== undefined, _content };
+			}
+		)?
+		_innerC:(Whitespace @ChoiceMixedTextAndLogic)? {
+			return { 
+				startContent: _startC, optionOnlyContent: _optionC, innerContent: _innerC , isFallback: false
+			};
+		}
+
 
 BracketedName
 	= "(" Whitespace name:validIdentifier Whitespace")" { return name; }
